@@ -25,45 +25,57 @@ const Cart = (props) => {
 		setIsCheckout(true);
 	};
 
-	const cartItems = (
-		<ul className={classes["cart-items"]}>
-			{cartCtx.items.map((item) => (
-				<CartItem
-					key={item.id}
-					name={item.name}
-					amount={item.amount}
-					price={item.price}
-					onRemove={cartItemRemoveHandler.bind(null, item.id)}
-					onAdd={cartItemAddHandler.bind(null, item)}
-				/>
-			))}
+	const submitOrderHandler = (userData) => {
+		fetch('https://react-http-a1d35-default-rtdb.firebaseio.com/orders.json', {
+		  method: 'POST',
+		  body: JSON.stringify({
+			user: userData,
+			orderedItems: cartCtx.items
+		  })
+		});
+	  };
+	
+	  const cartItems = (
+		<ul className={classes['cart-items']}>
+		  {cartCtx.items.map((item) => (
+			<CartItem
+			  key={item.id}
+			  name={item.name}
+			  amount={item.amount}
+			  price={item.price}
+			  onRemove={cartItemRemoveHandler.bind(null, item.id)}
+			  onAdd={cartItemAddHandler.bind(null, item)}
+			/>
+		  ))}
 		</ul>
-	);
-
-	const modalActions = (
+	  );
+	
+	  const modalActions = (
 		<div className={classes.actions}>
-			<button className={classes["button--alt"]} onClick={props.onClose}>
-				Close
+		  <button className={classes['button--alt']} onClick={props.onClose}>
+			Close
+		  </button>
+		  {hasItems && (
+			<button className={classes.button} onClick={orderHandler}>
+			  Order
 			</button>
-			{hasItems && (
-				<button className={classes.button} onClick={orderHandler}>
-					Order
-				</button>
-			)}
+		  )}
 		</div>
-	);
-
-	return (
+	  );
+	
+	  return (
 		<Modal onClose={props.onClose}>
-			{cartItems}
-			<div className={classes.total}>
-				<span>Total Amount</span>
-				<span>{totalAmount}</span>
-			</div>
-			{isCheckout && <Checkout onCancel={props.onClose} />}
-			{!isCheckout && modalActions}
+		  {cartItems}
+		  <div className={classes.total}>
+			<span>Total Amount</span>
+			<span>{totalAmount}</span>
+		  </div>
+		  {isCheckout && (
+			<Checkout onConfirm={submitOrderHandler} onCancel={props.onClose} />
+		  )}
+		  {!isCheckout && modalActions}
 		</Modal>
-	);
-};
+	  );
+	};
 
 export default Cart;
